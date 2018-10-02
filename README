@@ -7,5 +7,3 @@ and expect it to work on similar configurations. You also need to install msgpac
 
 To compile your code, you need to update Makefile and update T1 in the Makefile. You can compile the code by "make"
 command. The executable file will be in /bin directory. 
-
-We broke the whole code in different pieces to make sure the code is runnable in a computer with limited resources.

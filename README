@@ -1,0 +1,11 @@
+We used JustGarble library for our implementation. A recent half-gates optimization is applied to this construction 
+to reduce communication associated with garbled gates.
+
+Setting up JustGarble:
+JustGarble is designed to work on x86-64 machines running Linux. JustGarble was tested on Ubuntu 12.10 with gcc-4.6.3,
+and expect it to work on similar configurations. You also need to install msgpack.
+
+To compile your code, you need to update Makefile and update T1 in the Makefile. You can compile the code by "make"
+command. The executable file will be in /bin directory. 
+
+We broke the whole code in different pieces to make sure the code is runnable in a computer with limited resources.

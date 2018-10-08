@@ -4,7 +4,7 @@
 #include <time.h>
 #include "../include/justGarble.h"
 
-#define N_allels 10000
+#define N_allels 1000
 //N_AB
 #define Size_I 8
 //N, it is usually equals to Size_I

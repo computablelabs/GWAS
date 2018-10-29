@@ -4,16 +4,16 @@
 #include <time.h>
 #include "../include/justGarble.h"
 
-//two main parameters of LD test
+//M is the number of alleles for which LD test run, with all M instances of the LD test being executed at the same time
 #define M_allels 10000
 
-//N_AB, N_Ab, N_aB, N_ab
+//N_AB, N_Ab, N_aB, N_ab shows the number of instances of each of the four haplotypes (AB, Ab, aB, ab) in the observed population, and Size_I is the bit length of those inputs
 #define Size_I 8
 
-//N, N in our case is 200 (8), 400 (9), 800 (10), 1600 (11)
+//N is another input of LD test which is a constant, N in our case is 200 (8), 400 (9), 800 (10), 1600 (11)
 #define Size_N 8
 
-//threshold
+//size of threshold
 #define Size_T 4
 
 //length of inputs
@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
     GarbledCircuit garbledCircuit;
     GarblingContext garblingContext;
     
-    //Set up circuit parameters
+    //Set up circuit parameters which show number of reserved gates and wires for the designed circuit
     int q, r;
     q = 90000000;
     r = 90000000;

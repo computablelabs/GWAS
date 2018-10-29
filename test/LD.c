@@ -4,15 +4,21 @@
 #include <time.h>
 #include "../include/justGarble.h"
 
-#define N_allels 1000
-//N_AB
+//two main parameters of LD test
+#define M_allels 10000
+
+//N_AB, N_Ab, N_aB, N_ab
 #define Size_I 8
-//N, it is usually equals to Size_I
+
+//N, N in our case is 200 (8), 400 (9), 800 (10), 1600 (11)
 #define Size_N 8
+
 //threshold
 #define Size_T 4
+
 //length of inputs
-#define n   N_allels * (4 * Size_I)
+#define n   M_allels * (4 * Size_I)
+
 //length of output
 #define m    1
 
@@ -26,8 +32,8 @@ int main(int argc, char **argv) {
     
     //Set up circuit parameters
     int q, r;
-    q = 10000;
-    r = 10000;
+    q = 90000000;
+    r = 90000000;
     
     //Set up input and output tokens/labels.
     block *labels = (block*) malloc(sizeof(block) * 2 * n);
@@ -54,18 +60,18 @@ int main(int argc, char **argv) {
             inp[i] = zero;
         else
             inp[i] = one;
-    
-    //computing N_A = A + B
-    int NA[N_allels][Size_I];
+   
+    //computing N_A = N_AB + N_Ab
+    int NA[M_allels][Size_I];
     int addi[Size_I*2];
     int addo[Size_I];
     int j;
-    for (i = 0; i < N_allels; i++)
+    for (i = 0; i < M_allels; i++)
     {
         for (j = 0; j < Size_I; j++)
         {
             addi[j] = inp[i*Size_I+j];
-            addi[Size_I+j] = inp[Size_I*N_allels+i*Size_I+j];
+            addi[Size_I+j] = inp[Size_I*M_allels+i*Size_I+j];
         }
         
         ADDCircuit(&garbledCircuit, &garblingContext, 2*Size_I, addi, addo);
@@ -74,14 +80,14 @@ int main(int argc, char **argv) {
             NA[i][j] = addo[j];
     }
     
-    //computing N_a = C + D
-    int Na[N_allels][Size_I];
-    for (i = 0; i < N_allels; i++)
+    //computing N_a = N_aB + N_ab
+    int Na[M_allels][Size_I];
+    for (i = 0; i < M_allels; i++)
     {
         for (j = 0; j < Size_I; j++)
         {
-            addi[j] = inp[2*Size_I*N_allel+i*Size_I+j];
-            addi[Size_I+j] = inp[3*Size_I*N_allels+i*Size_I+j];
+            addi[j] = inp[2*Size_I*M_allels+i*Size_I+j];
+            addi[Size_I+j] = inp[3*Size_I*M_allels+i*Size_I+j];
         }
         
         ADDCircuit(&garbledCircuit, &garblingContext, 2*Size_I, addi, addo);
@@ -90,14 +96,14 @@ int main(int argc, char **argv) {
             Na[i][j] = addo[j];
     }
     
-    //computing N_B = A + C
-    int NB[N_allels][Size_I];
-    for (i = 0; i < N_allels; i++)
+    //computing N_B = N_AB + N_aB
+    int NB[M_allels][Size_I];
+    for (i = 0; i < M_allels; i++)
     {
         for (j = 0; j < Size_I; j++)
         {
             addi[j] = inp[i*Size_I+j];
-            addi[Size_I+j] = inp[2*Size_I*N_allels+i*Size_I+j];
+            addi[Size_I+j] = inp[2*Size_I*M_allels+i*Size_I+j];
         }
         
         ADDCircuit(&garbledCircuit, &garblingContext, 2*Size_I, addi, addo);
@@ -106,14 +112,14 @@ int main(int argc, char **argv) {
             NB[i][j] = addo[j];
     }
     
-    //computing N_b = B + D
-    int Nb[N_allels][Size_I];
-    for (i = 0; i < N_allels; i++)
+    //computing N_b = N_Ab + N_ab
+    int Nb[M_allels][Size_I];
+    for (i = 0; i < M_allels; i++)
     {
         for (j = 0; j < Size_I; j++)
         {
-            addi[j] = inp[Size_I*N_allels+i*Size_I+j];
-            addi[Size_I+j] = inp[3*Size_I*N_allels+i*Size_I+j];
+            addi[j] = inp[Size_I*M_allels+i*Size_I+j];
+            addi[Size_I+j] = inp[3*Size_I*M_allels+i*Size_I+j];
         }
         
         ADDCircuit(&garbledCircuit, &garblingContext, 2*Size_I, addi, addo);
@@ -124,10 +130,10 @@ int main(int argc, char **argv) {
     
 
     //computing NA*NB
-    int NANB[N_allels][2*Size_I];
+    int NANB[M_allels][2*Size_I];
     int muli[2*Size_I];
     int mulo[2*Size_I];
-    for (i = 0; i < N_allels; i++)
+    for (i = 0; i < M_allels; i++)
     {
         for (j = 0; j < Size_I; j++)
         {
@@ -140,99 +146,107 @@ int main(int argc, char **argv) {
         for (j = 0; j < 2*Size_I; j++)
             NANB[i][j] = mulo[j];
     }
-    
+   
     //computing N*N_AB
-    int NNAB[N_allels][2*Size_I];
-    int N[Size_I];
+    int NNAB[M_allels][2*Size_N];
+    int N[Size_N];
+    int muli0[2*Size_N];
+    int mulo0[2*Size_N];
     //random N
-    for (i = 0; i < Size_I; i++)
-        if (Size_I%3==1)
+    for (i = 0; i < Size_N; i++)
+        if (Size_N%3==1)
             N[i] = zero;
         else
             N[i] = one;
     
-    for (j = 0; j < Size_I; j++)
+    for (j = 0; j < Size_N; j++)
     {
-        muli[Size_I+j] = N[j];
+        muli0[j] = N[j];
     }
     
-    for (i = 0; i < N_allels; i++)
+    for (j = Size_N; j < Size_N+(Size_N-Size_I); j++)
+        muli0[j] = zero;
+    
+    for (i = 0; i < M_allels; i++)
     {
         for (j = 0; j < Size_I; j++)
         {
-            muli[j] = inp[i*Size_I+j];
+            muli0[Size_N+(Size_N-Size_I)+j] = inp[i*Size_I+j];
         }
         
-        MULCircuit(&garbledCircuit, &garblingContext, 2*Size_I, muli, mulo);
+        MULCircuit(&garbledCircuit, &garblingContext, 2*Size_N, muli0, mulo0);
         
-        for (j = 0; j < 2*Size_I; j++)
-            NNAB[i][j] = mulo[j];
+        for (j = 0; j < Size_I+Size_N; j++)
+            NNAB[i][j] = mulo0[j+(Size_N-Size_I)];
     }
     
     //computing subtraction
-    int sub[N_allels][2*Size_I];
-    int subi[4*Size_I];
-    int subo[2*Size_I];
-    for (i = 0; i < N_allels; i++)
+    int sub[M_allels][Size_I+Size_N];
+    int subi[2*(Size_I+Size_N)];
+    int subo[Size_I+Size_N];
+    for (i = 0; i < M_allels; i++)
     {
-        for (j = 0; j < 2*Size_I; j++)
-        {
+        for (j = 0; j < Size_I+Size_N; j++)
             subi[j] = NNAB[i][j];
-            subi[2*Size_I+j] = NANB[i][j];
-        }
         
-        SUBCircuit(&garbledCircuit, &garblingContext, 4*Size_I, subi, subo);
+        for (j = Size_I+Size_N; j < Size_I+Size_N+(Size_I+Size_N-2*Size_I); j++)
+            subi[j] = zero;
         
         for (j = 0; j < 2*Size_I; j++)
+            subi[Size_I+Size_N+(Size_I+Size_N-2*Size_I)+j] = NANB[i][j];
+        
+        SUBCircuit(&garbledCircuit, &garblingContext, 2*(Size_I+Size_N), subi, subo);
+        
+        for (j = 0; j < Size_I+Size_N; j++)
             sub[i][j] = subo[j];
     }
-    
+   
     //computing squre
-    int s[N_allels][4*Size_I];
-    int muli1[4*Size_I];
-    int mulo1[4*Size_I];
-    for (i = 0; i < N_allels; i++)
+    int s[M_allels][2*(Size_I+Size_N)];
+    int muli1[2*(Size_I+Size_N)];
+    int mulo1[2*(Size_I+Size_N)];
+    for (i = 0; i < M_allels; i++)
     {
-        for (j = 0; j < 2*Size_I; j++)
+        for (j = 0; j < Size_I+Size_N; j++)
         {
             muli1[j] = sub[i][j];
-            muli1[2*Size_I+j] = sub[i][j];
+            muli1[Size_I+Size_N+j] = sub[i][j];
         }
         
-        MULCircuit(&garbledCircuit, &garblingContext, 4*Size_I, muli1, mulo1);
+        MULCircuit(&garbledCircuit, &garblingContext, 2*(Size_I+Size_N), muli1, mulo1);
         
-        for (j = 0; j < 4*Size_I; j++)
+        for (j = 0; j < 2*(Size_I+Size_N); j++)
             s[i][j] = mulo1[j];
     }
     
     //computing the left side
-    int l[N_allels][4*Size_I+size_N+1];
-    int muli2[8*Size_I];
-    int mulo2[8*Size_I];
-    for (i = 0; i < N_allels; i++)
+    int left[M_allels][2*(Size_I+Size_N)+Size_N+1];
+    int muli2[4*(Size_I+Size_N)];
+    int mulo2[4*(Size_I+Size_N)];
+    for (i = 0; i < M_allels; i++)
     {
-        for (j = 0; j < 4*Size_I; j++)
+        for (j = 0; j < 2*(Size_I+Size_N); j++)
         {
             muli2[j] = s[i][j];
         }
-        for (j = 0; j < 4*Size_I-Size_N-1; j++)
-            muli2[4*Size_I+j] = zero;
+        for (j = 0; j < 2*(Size_I+Size_N)-Size_N-1; j++)
+            muli2[2*(Size_I+Size_N)+j] = zero;
         
-        for (j = 4*Size_I-Size_N-1; j < 4*Size_I-1; j++)
-            muli2[4*Size_I+j] = N[j-(4*Size_I-Size_N-1)];
-        muli2[8*Size_I-1] = zero;
+        for (j = 2*(Size_I+Size_N)-Size_N-1; j < 4*(Size_I+Size_N)-1; j++)
+            muli2[2*(Size_I+Size_N)+j] = N[j-(2*(Size_I+Size_N)-Size_N-1)];
+        muli2[4*(Size_I+Size_N)-1] = zero;
         
-        MULCircuit(&garbledCircuit, &garblingContext, 8*Size_I, muli2, mulo2);
+        MULCircuit(&garbledCircuit, &garblingContext, 4*(Size_I+Size_N), muli2, mulo2);
         
-        for (j = 4*Size_I-size_N-1; j < 8*Size_I; j++)
-            l[i][j-(4*Size_I+size_N+1)] = mulo2[j];
+        for (j = 2*(Size_I+Size_N)-Size_N-1; j < 4*(Size_I+Size_N); j++)
+            left[i][j-(2*(Size_I+Size_N)-Size_N-1)] = mulo2[j];
     }
     
     
     //moving to the right side
     //computing Na*Nb
-    int NaNb[N_allels][2*Size_I];
-    for (i = 0; i < N_allels; i++)
+    int NaNb[M_allels][2*Size_I];
+    for (i = 0; i < M_allels; i++)
     {
         for (j = 0; j < Size_I; j++)
         {
@@ -247,8 +261,8 @@ int main(int argc, char **argv) {
     }
     
     //computing N_A*N_a*N_B*N_b
-    int NANaNBNb[N_allels][4*Size_I];
-    for (i = 0; i < N_allels; i++)
+    int NANaNBNb[M_allels][4*Size_I];
+    for (i = 0; i < M_allels; i++)
     {
         for (j = 0; j < 2*Size_I; j++)
         {
@@ -263,50 +277,52 @@ int main(int argc, char **argv) {
     }
     
     //computing the right side
-    int r[N_allels][4*Size_I+size_N+1];
-    for (i = 0; i < N_allels; i++)
+    int right[M_allels][2*(Size_I+Size_N)+Size_N+1];
+    int muli3[8*Size_I];
+    int mulo3[8*Size_I];
+    for (i = 0; i < M_allels; i++)
     {
         for (j = 0; j < 4*Size_I; j++)
         {
-            muli2[j] = NANaNBNb[i][j];
+            muli3[j] = NANaNBNb[i][j];
         }
         for (j = 0; j < 4*Size_I-Size_T; j++)
-            muli2[4*Size_I+j] = zero;
+            muli3[4*Size_I+j] = zero;
         
         //random T
         for (j = 4*Size_I-Size_T; j < 4*Size_I; j++)
             if (j%3==1)
-                muli2[4*Size_I+j] = zero;
+                muli3[4*Size_I+j] = zero;
             else
-                muli2[4*Size_I+j] = one;
+                muli3[4*Size_I+j] = one;
         
-        MULCircuit(&garbledCircuit, &garblingContext, 8*Size_I, muli2, mulo2);
+        MULCircuit(&garbledCircuit, &garblingContext, 8*Size_I, muli3, mulo3);
         
-        for (j = 4*Size_I-size_N-1; j < 8*Size_I; j++)
-            r[i][j-(4*Size_I+size_N+1)] = mulo2[j];
+        for (j = 8*Size_I-(2*(Size_I+Size_N)+Size_N+1); j < 8*Size_I; j++)
+            right[i][j-(8*Size_I-(2*(Size_I+Size_N)+Size_N+1))] = mulo3[j];
     }
-    
+   
     //final result
-    int ld[N_allels];
-    int leqi[2*(4*Size_I+size_N+1)];
+    int ld[M_allels];
+    int leqi[2*(2*(Size_I+Size_N)+Size_N+1)];
     int leqo[1];
-    for (i = 0; i < N_allels; i++)
+    for (i = 0; i < M_allels; i++)
     {
-        for (j = 0; j < 4*Size_I+size_N+1; j++)
+        for (j = 0; j < 2*(Size_I+Size_N)+Size_N+1; j++)
         {
-            leqi[j] = l[i][j];
-            leqi[4*Size_I+size_N+1+j] = r[i][j];
+            leqi[j] = left[i][j];
+            leqi[2*(Size_I+Size_N)+Size_N+1+j] = right[i][j];
         }
         
-        LEQCircuit(&garbledCircuit, &garblingContext, 2*(4*Size_I+size_N+1), leqi, leqo);
+        LEQCircuit(&garbledCircuit, &garblingContext, 2*(2*(Size_I+Size_N)+Size_N+1), leqi, leqo);
         
         ld[i] = leqo[0];
     }
+
     
     //report output;
     final = &ld[0];
     finishBuilding(&garbledCircuit, &garblingContext, outputMap, final);
-    int TIMES1 = 2;
     long int timeGarble[TIMES];
     long int timeEval[TIMES];
     double timeGarbleMedians[TIMES];

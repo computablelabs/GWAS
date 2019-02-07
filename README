@@ -1,4 +1,4 @@
-We used JustGarble library for our implementation. A recent half-gates optimization is applied to this construction 
+We used JustGarble library for our garbled circuit based implementation. A recent half-gates optimization is applied to this construction 
 to reduce communication associated with garbled gates.
 
 Setting up JustGarble:
@@ -7,3 +7,5 @@ and expect it to work on similar configurations. You also need to install msgpac
 
 To compile your code, you need to update Makefile and update T1 in the Makefile. You can compile the code by "make"
 command. The executable file will be in /bin directory. 
+
+We also used SEAL library for fully homomorphic encryption based implementation. The details of implementation are provided in LD_FHE.cpp.
